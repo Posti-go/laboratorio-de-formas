@@ -23,6 +23,7 @@ let wheelResetTimer = null;
 let wheelCooldownUntil = 0;
 let wheelDirection = 0;
 let launchStarted = false;
+let finalSequenceRunning = false;
 
 const clamp = (value, min, max) => Math.min(max, Math.max(min, value));
 
@@ -87,16 +88,19 @@ function resetFinalLine() {
   typedCursor.classList.remove('is-active');
   typedCursor.style.opacity = '';
   typedCursor.style.animation = '';
+  finalSequenceRunning = false;
 }
 
 function animateFinalLine() {
   finalAnimationToken += 1;
+  finalSequenceRunning = true;
   const token = finalAnimationToken;
   const strikeDuration = 80;
   const typeDuration = 1200;
   const cursorDelayAfterStrike = 240;
-  const blinkCount = 3;
-  const blinkHalfCycleMs = 500;
+  const blinkCount = 2;
+  const blinkHalfCycleMs = 350;
+  // Strict blink cycles before typing: on/off repeated blinkCount times.
   const preTypingBlinkDuration = blinkCount * blinkHalfCycleMs * 2;
   const cursorStart = strikeDuration + cursorDelayAfterStrike;
   const typingStart = cursorStart + preTypingBlinkDuration;
@@ -104,6 +108,7 @@ function animateFinalLine() {
 
   function frame(now) {
     if (token !== finalAnimationToken) {
+      finalSequenceRunning = false;
       return;
     }
 
@@ -116,7 +121,7 @@ function animateFinalLine() {
       typedBlue.textContent = '';
       typedCursor.style.opacity = '0';
       typedCursor.style.animation = 'none';
-    } else if (elapsed <= typingStart) {
+    } else if (elapsed < typingStart) {
       typedBlue.textContent = '';
       const blinkElapsed = elapsed - cursorStart;
       const blinkPhase = Math.floor(blinkElapsed / blinkHalfCycleMs) % 2;
@@ -125,7 +130,8 @@ function animateFinalLine() {
     } else {
       const typingElapsed = elapsed - typingStart;
       const typingProgress = clamp(typingElapsed / typeDuration, 0, 1);
-      const charCount = Math.round(typedPhrase.length * typingProgress);
+      const charCount =
+        typingProgress >= 1 ? typedPhrase.length : Math.max(1, Math.round(typedPhrase.length * typingProgress));
 
       typedBlue.textContent = typedPhrase.slice(0, charCount);
       typedCursor.style.opacity = typingProgress < 1 ? '1' : '0';
@@ -134,6 +140,8 @@ function animateFinalLine() {
 
     if (elapsed < typingStart + typeDuration) {
       requestAnimationFrame(frame);
+    } else {
+      finalSequenceRunning = false;
     }
   }
 
@@ -168,6 +176,9 @@ function renderStep(direction = 1) {
 
 function moveStep(direction) {
   if (!launched || stepLocked) {
+    return false;
+  }
+  if (finalSequenceRunning) {
     return false;
   }
 
