@@ -74,6 +74,29 @@ body.logo-docked .logo-wrap {
   text-align: left;
 }
 
+.scroll-cue {
+  position: absolute;
+  left: 50%;
+  bottom: 16px;
+  transform: translateX(-50%);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 320ms ease;
+  z-index: 3;
+}
+
+.scroll-cue img {
+  display: block;
+  width: auto;
+  max-width: 100%;
+  height: auto;
+}
+
+.scroll-cue.is-visible {
+  opacity: 0.75;
+  animation: scroll-cue-float 1.65s ease-in-out infinite;
+}
+
 .line {
   margin: 0;
   position: absolute;
@@ -150,6 +173,16 @@ body.logo-docked .logo-wrap {
 @keyframes blink {
   50% {
     opacity: 0;
+  }
+}
+
+@keyframes scroll-cue-float {
+  0%,
+  100% {
+    transform: translate(-50%, 0);
+  }
+  50% {
+    transform: translate(-50%, -6px);
   }
 }
 

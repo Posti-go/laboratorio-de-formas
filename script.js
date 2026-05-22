@@ -4,6 +4,7 @@ const strikeTarget = document.getElementById('strikeTarget');
 const typedBlue = document.getElementById('typedBlue');
 const typedCursor = document.getElementById('typedCursor');
 const logo = document.querySelector('.logo');
+const scrollCue = document.getElementById('scrollCue');
 
 const maxStep = 3;
 const typedPhrase = ' feels awesome to use.';
@@ -24,8 +25,18 @@ let wheelCooldownUntil = 0;
 let wheelDirection = 0;
 let launchStarted = false;
 let finalSequenceRunning = false;
+let hasCueBeenDismissed = false;
 
 const clamp = (value, min, max) => Math.min(max, Math.max(min, value));
+
+function updateScrollCue() {
+  if (!scrollCue) {
+    return;
+  }
+
+  const shouldShow = launched && !hasCueBeenDismissed && currentStep <= 1;
+  scrollCue.classList.toggle('is-visible', shouldShow);
+}
 
 function setVisibleLine(index, direction = 1) {
   if (activeLineIndex === index) {
@@ -152,6 +163,7 @@ function renderStep(direction = 1) {
   if (!launched) {
     setVisibleLine(-1, direction);
     resetFinalLine();
+    updateScrollCue();
     return;
   }
 
@@ -159,6 +171,7 @@ function renderStep(direction = 1) {
     finalAnimationToken += 1;
     setVisibleLine(currentStep, direction);
     resetFinalLine();
+    updateScrollCue();
     return;
   }
 
@@ -167,9 +180,11 @@ function renderStep(direction = 1) {
   if (currentStep === 2) {
     finalAnimationToken += 1;
     resetFinalLine();
+    updateScrollCue();
     return;
   }
 
+  updateScrollCue();
   resetFinalLine();
   animateFinalLine();
 }
@@ -189,6 +204,9 @@ function moveStep(direction) {
   }
 
   currentStep = nextStep;
+  if (currentStep === 1 && nextStep >= 2) {
+    hasCueBeenDismissed = true;
+  }
   stepLocked = true;
   renderStep(direction);
 
