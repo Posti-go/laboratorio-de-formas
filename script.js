@@ -34,7 +34,7 @@ function updateScrollCue() {
     return;
   }
 
-  const shouldShow = launched && !hasCueBeenDismissed && currentStep <= 1;
+  const shouldShow = launched && !hasCueBeenDismissed && currentStep === 0;
   scrollCue.classList.toggle('is-visible', shouldShow);
 }
 
@@ -204,7 +204,7 @@ function moveStep(direction) {
   }
 
   currentStep = nextStep;
-  if (currentStep === 1 && nextStep >= 2) {
+  if (currentStep === 0 && nextStep >= 1) {
     hasCueBeenDismissed = true;
   }
   stepLocked = true;
